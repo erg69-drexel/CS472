@@ -14,6 +14,7 @@ Based on your results, explain why the physical distance to an NTP server affect
 Include your actual test results and delay measurements in your answer.
 
 - With server closer: time.nist.gov:
+~~~
     Received NTP response from time.nist.gov!
     --- Response Packet ---
     Leap Indicator: 0
@@ -38,6 +39,7 @@ Include your actual test results and delay measurements in your answer.
 
     Time offset: -0.000006
     Final Dispersion: 0.02361
+    ~~~
 
 - With server far away: asia.pool.ntp.org:
     Received NTP response from asia.pool.ntp.org!
