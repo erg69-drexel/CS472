@@ -35,7 +35,7 @@ Include your actual test results and delay measurements in your answer.
     Server: time.nist.gov
     Server Time: 2025-10-15 17:05:59.090151
     Local Time: 2025-10-15 17:05:59.113776
-    ==Round Trip Delay: 0.047238==
+    Round Trip Delay: 0.047238
 
     Time offset: -0.000006
     Final Dispersion: 0.02361
@@ -63,7 +63,7 @@ Include your actual test results and delay measurements in your answer.
     Server: asia.pool.ntp.org
     Server Time: 2025-10-15 17:04:18.445496
     Local Time: 2025-10-15 17:04:18.535090
-    ==Round Trip Delay: 0.183974==
+    Round Trip Delay: 0.183974
 
     Time offset: 0.002393
     Final Dispersion: 0.091987
