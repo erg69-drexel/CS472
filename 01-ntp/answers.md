@@ -39,9 +39,10 @@ Include your actual test results and delay measurements in your answer.
 
     Time offset: -0.000006
     Final Dispersion: 0.02361
-    ~~~
+~~~
 
 - With server far away: asia.pool.ntp.org:
+~~~
     Received NTP response from asia.pool.ntp.org!
     --- Response Packet ---
     Leap Indicator: 0
@@ -66,6 +67,7 @@ Include your actual test results and delay measurements in your answer.
 
     Time offset: 0.002393
     Final Dispersion: 0.091987
+~~~    
 
 - From these results, we see that the delay for a "closer" server is .047238, and the further away server, in Asia, the delay is much greater at .183974. Additionally, it is good to point out the time offset's in both of these, with the US-based server coming in at +/- 23.62ms, and the Asia-based server at 99.99ms - quite a large difference! Overall, this shows that distance also plays a large factor in distributed systems. Just because a time server is considered "good" might not necessarily mean that it is the best option for the optimum synchronization. The further away a server is, the more hops the packet must jump through in order to get to it's destination, leading to larger delays in reception of a packet, and lowering the quality of the data received.
 
