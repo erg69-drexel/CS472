@@ -41,11 +41,11 @@ Our protocol uses a fixed-structure PDU with a header containing `msg_type`, `di
 
 **Hint:** Think about different types of data (text, binary, encrypted bytes) and how the receiver knows what it's receiving.
 
-```
+
  Having a fixed PDU-structure with a header makes this program much simpler, contrary to the example provided. For example, the payload_len field helps with ensuring that all data is fully received by recv(), and allows us to loop around and continue to recv() until the bytes received is equal to the payload length. In the example provided, with the raw text strings, you would not be able to tell when all data has been received, which can lead to missing data. Additionally, because we are also using encryption for this assignment, raw text is not the only format being used. When data is encrypted, it is not guaranteed to be sent as a raw text string, which can lead to parsing errors later on. 
 
 Having a msg_type field is also extremely useful, as it allows for easy command handling, there is no need to parse anything, you can simply look at the header of the packet and see if it is message data, requesting an encryption key, or sending encrypted information. From there it is as simple as an if/else or switch case on the message type.
-```
+
 
 ---
 
@@ -60,12 +60,11 @@ TCP is a **stream-oriented protocol** (not message-oriented), yet our PDU includ
 
 **Hint:** Consider what happens when multiple PDUs are sent in rapid succession, or when a large PDU arrives in multiple `recv()` calls.
 
-```
+
 Because TCP is stream-oriented, the receiver of a message gets a continuous flow of bytes. As a result of this, the receiver has no way of knowing when one message ends and another begins. The payload_len field is extremely important as it allows the receiver to first look at the header of the packet, and determine how many bytes it needs to receive. From there, the receiver can call recv() again, and loop around, counting the number of bytes received each time, until the number of bytes received is equal to the payload length, delivered in the header.
 
 In the case of multiple PDUs sent in rapid succession, without knowing the length of each PDU payload, multiple PDUs can be merged together, since you cannot ensure each payload is received fully, as you don’t know the payload length, and therefore cannot loop around and call recv() multiple times on one payload until it is fully received.
 
-```
 
 ---
 
@@ -80,7 +79,7 @@ The key exchange must happen **before** any encrypted messages can be sent, and 
 
 **Hint:** Think about what "session state" means and how it relates to the TCP connection lifecycle.
 
-```
+
 Key exchange taking place before any encrypted messages are sent and keys being session specific are extremely important when it comes to secure messaging. 
 
 Hardcoding client and server keys with pre-shared keys essentially negates any security that would be taking place if they were generated keys per session. While it may protect against message interception, all other protections are theoretically thrown out the window. For example, if one client was attacked and compromised, then essentially all other clients would also be compromised, as they all share the same key. 
@@ -89,7 +88,7 @@ Generating new keys per session allows for single use keys per connection, which
 
 As for the choice of TCP vs UDP, a server with UDP does not know which client it is communicating with, and can not have a session key assigned to each client. On the other hand, with TCP, the server keeps track of which session key belongs to which client. Additionally, as mentioned previously, with UDP, keys could get lost in transmission as it does not guarantee delivery, which would lead to encryption/decryption errors between the client and server.
 
-```
+
 
 ---
 
@@ -104,14 +103,13 @@ Every PDU includes a `direction` field (DIR_REQUEST or DIR_RESPONSE), even thoug
 
 **Hint:** Think about protocol clarity, error detection, and future extensibility beyond simple client-server.
 
-```
+
 Firstly, having the direction field for request or response in the PDU header is extremely useful for debugging. For example, in this assignment, we were provided the function “print_msg_info()”, which displays the command type, payload length, as well as the direction. For debugging, you can easily see what is being sent from where, which is especially useful when having to look at how many bytes are sent to the server, and how many are received from the server.
 
 If you were to swap request and response handling code, error handling could be implemented on the server to check if the incoming message is a request or response, and you could do the same for a client. This would ensure that both are always receiving the correct type of packet, and won’t try to process incorrect packets.
 
 While this might seem redundant, if we were to implement peer-to-peer, it may not be as cut and dry. While in this program, the client will be sending requests, and the server will be sending responses, that same logic might not apply in peer-to-peer. They could be sending commands back and forth, which could lead to confusion if the direction is unknown. 
 
-```
 
 ---
 
