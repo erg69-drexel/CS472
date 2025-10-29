@@ -22,11 +22,11 @@ This assignment requires you to use TCP instead of UDP. Explain in detail **why 
 
 **Hint:** Think about what happens to the encryption keys during a session and what TCP guarantees that UDP doesn't.
 
-```
+
 TCP is necessary for this assignment due to its reliable and ordered stream protocol. This means that the protocol ensures that packets are not only delivered, but delivered in order, making it essential for secure (encrypted) communications. If data is lost in transmission, then things like secure keys can be lost or delivered out of order, leading to errors when another party is decrypting. Additionally, because TCP is a stream protocol, this means that once a connection is established between a server and client, that connection remains open until one of them disconnects. This is crucial for secure communications, as it allows for one key to be generated and used throughout the communication until it is closed.
 
 UDP on the other hand would not be ideal for something like a secure communication program. UDP does not guarantee delivery of all data, making it not desirable for secure communication, due to the fact that if keys are lost, the communication won’t work. Because it is not a “reliable” transmission protocol, we would also have to handle a lot of the error checking and network packet handling, which can make things much more complicated.
-```
+
 
 ---
 
