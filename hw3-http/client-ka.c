@@ -121,6 +121,7 @@ int submit_request(int sock, const char *host, uint16_t port, char *resource){
             return sock;
         } 
 
+        //active socket now, can send
         sent_bytes = send(sock, req, send_sz, 0);
     }
 

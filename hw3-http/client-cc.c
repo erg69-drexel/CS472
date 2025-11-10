@@ -88,11 +88,11 @@ int process_request(const char *host, uint16_t port, char *resource){
     while (!server_done){
         int recv_length = recv(sock, recv_buff, sizeof(recv_buff), 0);
 
-        //check recv
+        //check recv for error
         if (recv_length < 0){
-            perror("recv() error");
+            perror("recv error");
             return -1;
-        } //if server closes:
+        } //check recv for server close
         else if (recv_length == 0){
             printf("\n DONE! Server Closed Connection\n");
             server_done = 1;
@@ -100,11 +100,12 @@ int process_request(const char *host, uint16_t port, char *resource){
         }
 
         total_bytes += recv_length;
-        printf("%.*s", recv_length, recv_buff);
+        //printf("%.*s", recv_length, recv_buff);
     }
 
 
     close(sock);
+    fprintf(stdout, "TOTAL BYTES: %d\n", total_bytes);
     return total_bytes;
 }
 
