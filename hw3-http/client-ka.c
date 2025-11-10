@@ -10,8 +10,6 @@
 #define  BUFF_SZ            1024
 #define  MAX_REOPEN_TRIES   5
 
-//time buffers
-time_t start_time, end_time;
 
 char recv_buff[BUFF_SZ];
 
@@ -165,7 +163,7 @@ int submit_request(int sock, const char *host, uint16_t port, char *resource){
     printf("Header Length: %d\n", header_len);
 
     //debug for printing header
-    fprintf(stdout, "%.*s", bytes_recvd, recv_buff);
+    //fprintf(stdout, "%.*s", bytes_recvd, recv_buff);
 
     //check if neg value:
 
@@ -231,10 +229,19 @@ int submit_request(int sock, const char *host, uint16_t port, char *resource){
         }
 
         bytes_recvd = recv(sock, recv_buff, bytes_to_send, 0); // replace with a valid recv(...); call
+
+        //check recv
+        if (bytes_recvd == 0){
+            perror("Server Closed Connection before full body recv'ed\n");
+            close(sock);
+            return -1;
+        } else if(bytes_recvd < 0){
+            perror("Error Recv");
+        }
         
         //You can uncomment out the fprintf() calls below to see what is going on
 
-        fprintf(stdout, "%.*s", bytes_recvd, recv_buff);
+        //fprintf(stdout, "%.*s", bytes_recvd, recv_buff);
         total_bytes += bytes_recvd;
         //fprintf(stdout, "remaining %d, received %d\n", bytes_remaining, bytes_recvd);
         bytes_remaining -= bytes_recvd;
@@ -252,14 +259,25 @@ int submit_request(int sock, const char *host, uint16_t port, char *resource){
     // You dont have any code to change, but explain why this function, if it gets to this
     // point returns an active socket.
     //
-    // YOUR ANSWER:  <START-YOUR-RESPONSE-HERE>
+    // YOUR ANSWER: if the function gets to this point, it means that there is an active socket. 
+    // to elaborate, the function starts off by attempting to send the request to the socket. It then checks 
+    // if there was an error sending, meaning the socket is closed. If that is the case, then the function
+    //attempts to reopen the socket. We then check if the socket was successfully opened, and if not, we exit 
+    // the function. From there, we attempt to send again, and if an error occurs at this point, we exit the function
+    // and close the socket. If the function gets past this point, that means we have a successful send. We then 
+    // attempt to recv the header from the socket. If this is unsuccessful, we exit. Then we get the header length, 
+    // and we error check that, if there is an error, we exit. From there, the rest of it is just recv() calls to the socket,
+    // and there is error checking in place so that if there is an error the function ends.
+    //
+    // Overall, the ultimate answer is that there are multiple error checks in place that exit the function prior to reaching this point.
+    // If we get to this point, it means that no errors were raised, and the current socket is active.
     //
     //--------------------------------------------------------------------------------
     return sock;
 }
 
 int main(int argc, char *argv[]){
-    time(&start_time);
+    clock_t start = clock();
     int sock;
 
     const char *host = DEFAULT_HOST;
@@ -293,10 +311,9 @@ int main(int argc, char *argv[]){
     }
 
     server_disconnect(sock);
-    time(&end_time);
+    clock_t end = clock();
 
-    double elapsed = difftime(end_time, start_time);
-    printf("\nStart Time: %s", ctime(&start_time));
-    printf("End Time:   %s", ctime(&end_time));
-    printf("Elapsed:    %.2f seconds\n", elapsed);
+    double elapsed = (double)(end - start) / CLOCKS_PER_SEC;
+
+    printf("Elapsed: %.5f seconds\n", elapsed);
 }

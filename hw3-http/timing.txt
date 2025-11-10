@@ -1,17 +1,20 @@
 Timing for Connection Close:
 
-Attempt 1:
+Attempt 1: 0.00150 seconds
 
-Attempt 2:
+Attempt 2: 0.00130 seconds
 
-Attempt 3:
+Attempt 3:0.00107 seconds
 
 Timing for Keep-Alive:
 
-Attempt 1: 11 Seconds
+Attempt 1:  0.00113 Seconds
 
-Attempt 2: 13 Seconds
+Attempt 2: 0.00089 Seconds
 
-Attempt 3: 1 Second
+Attempt 3:  0.00098 Seconds
 
-started getting faster responses?
+
+From this, we see that the Keep-Alive is faster on average. Logically, this makes sense. With the Connection-Close verison, every time we want to make a request, we have to 
+create a whole new socket, which can take computer resources each time. On the other hand, with Keep-Alive, we are able to only make the socket connection once, so we don't need
+to recreate every time we want to make a request.

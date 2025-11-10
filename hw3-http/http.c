@@ -74,6 +74,26 @@ char *strnstr(const char *s, const char *find, size_t slen)
 	return ((char *)s);
 }
 
+/* socket_connect(host, port)
+
+This function takes a host (as a set of characters), and a port number.
+
+First, the function "translates" the host into an IP address using `gethostbyname()`
+The function then checks to ensure that it was able to translate and continues
+From there, it uses bcopy(), or "byte-copy". This copies the translated bytes of the ip
+into the ip address field of the sockaddr struct
+
+Next, it converts the port number from host to network byte order and fills 
+the port field of the sockaddr struct.
+
+From there, it creates a socket, and returns an error (-1) if there was an error with the socket
+
+If we continue past this, that means we now have an active socket, and the function attempts to connect
+to the host on the socket, and returns if there is an error.
+
+Finally, if no errors were raised this function returns an active socket.
+
+*/
 
 int socket_connect(const char *host, uint16_t port){
     struct hostent *hp;
@@ -106,6 +126,24 @@ int socket_connect(const char *host, uint16_t port){
 }
 
 
+/* get_http_header_len(buff, length)
+
+This function takes a pointer to a character buffer, as well as the number of bytes stored in the buffer as
+parameters. The buffer will contain the results of a recv() from the host.
+
+This function sets a pointer, end_ptr, to start of the buffer end sequence. To do this, it uses strnstr(), which looks for the first occurence of 
+the constant HTTP_HEADER_END, and returns the beginning of the the HTTP_HEADER_END. So this means that the pointer is sitting at the end of the http header/start of the end sequence.
+
+A check is also performed to ensure that we received the full header, and if not, -1 is returned.
+
+From there, we perform the calculation to get the actual header length. To do this, we subtract the end pointer from the http buffer, essentially
+subtracting the end of the header (without the end sequence) from the start to get the length, and also add on the length of the header_end, since the end_ptr points to the beginning of that 
+sequence, not the end.
+
+At this point we have the header length and it is returned.
+
+*/
+
 int get_http_header_len(char *http_buff, int http_buff_len){
     char *end_ptr;
     int header_len = 0;
@@ -121,27 +159,46 @@ int get_http_header_len(char *http_buff, int http_buff_len){
     return header_len;
 }
 
+/* get_http_content_len(buff, len)
+
+This function again takes both a pointer to the http_buffer, and the length of the header.
+
+To do this, it goes through a loop that continues through each header line until it is at the end of the header.
+
+It first copies the first line into header_line, by looking for the header EOL.
+
+from there, it checks for an occurence of the CL_Header field, or the Content-Length field.
+If that is found, it then looks for the delimiter, a colon (:). Now that we are at the colon,
+we move the pointer forward once, meaning that we are now at the length. All we have to do now is convert
+the number as a string into an actual number using atoi(). Then we can just return the length.
+
+If the CL_header field is not found on the line, the function moves to the next line by adding the length of the current line (plus the EOL)
+to the next_header_line pointer. It then repeats the whole process all over again.
+
+If it goes through the entire header without finding the CL, it returns 0.
+
+*/
 
 int get_http_content_len(char *http_buff, int http_header_len){
     char header_line[MAX_HEADER_LINE];
 
-    char *next_header_line = http_buff;
-    char *end_header_buff = http_buff + http_header_len;
+    char *next_header_line = http_buff; //start of the header
+    char *end_header_buff = http_buff + http_header_len; //end of the header
 
     while (next_header_line < end_header_buff){
-        bzero(header_line,sizeof(header_line));
-        sscanf(next_header_line,"%[^\r\n]s", header_line);
+        bzero(header_line,sizeof(header_line)); //set header_line to 0
+        sscanf(next_header_line,"%[^\r\n]s", header_line); // copys the up to the EOL of the header line into header_line 
 
-        char *isCLHeader = strcasestr(header_line,CL_HEADER);
+        char *isCLHeader = strcasestr(header_line,CL_HEADER); //returns pointer to first occurence of CL_Header
         if(isCLHeader != NULL){
-            char *header_value_start = strchr(header_line, HTTP_HEADER_DELIM);
-            if (header_value_start != NULL){
-                char *header_value = header_value_start + 1;
-                int content_len = atoi(header_value);
-                return content_len;
+            char *header_value_start = strchr(header_line, HTTP_HEADER_DELIM); // returns pointer to first occurence of the header delimiter (":")
+            if (header_value_start != NULL){ //if found the delimeter
+                char *header_value = header_value_start + 1; // go one value ahead, which will be the "Content-Length"
+                int content_len = atoi(header_value); //convert the length from a string to a number
+                return content_len; //return the number
             }
         }
-        next_header_line += strlen(header_line) + strlen(HTTP_HEADER_EOL);
+        next_header_line += strlen(header_line) + strlen(HTTP_HEADER_EOL); //increase the current header line that was just scanf'ed and go to the next line
     }
     fprintf(stderr,"Did not find content length\n");
     return 0;

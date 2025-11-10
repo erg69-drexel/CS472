@@ -5,8 +5,10 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <time.h>
 
 #define  BUFF_SZ 1024
+
 
 char recv_buff[BUFF_SZ];
 
@@ -107,6 +109,7 @@ int process_request(const char *host, uint16_t port, char *resource){
 }
 
 int main(int argc, char *argv[]){
+    clock_t start = clock();
     int sock;
 
     const char *host = DEFAULT_HOST;
@@ -136,4 +139,9 @@ int main(int argc, char *argv[]){
             process_request(host, port, resource);
         }
     }
+
+
+    clock_t end = clock();
+    double elapsed = (double)(end - start) / CLOCKS_PER_SEC;
+    printf("Elapsed: %.5f seconds\n", elapsed);
 }
